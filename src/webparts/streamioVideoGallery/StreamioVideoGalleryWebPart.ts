@@ -5,21 +5,24 @@ import { Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
   PropertyPaneTextField,
-  PropertyPaneLabel
-  // No PropertyPaneTextFieldType needed here for the 'type' property of PropertyPaneTextField
+  PropertyPaneLabel,
+  PropertyPaneSlider, // För numberOfVideos
+  PropertyPaneDropdown // För sortOrder
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { ThemeProvider, ThemeChangedEventArgs } from '@microsoft/sp-component-base';
 
 import * as strings from 'StreamioVideoGalleryWebPartStrings';
 import StreamioVideoGallery from './components/StreamioVideoGallery';
-import { IStreamioVideoGalleryProps } from './components/IStreamioVideoGalleryProps';
+import { IStreamioVideoGalleryProps, SortOrderOptions } from './components/IStreamioVideoGalleryProps'; // Importera SortOrderOptions
 
 export interface IStreamioVideoGalleryWebPartProps {
   title: string;
   streamioUsername: string;
   streamioPassword: string;
   streamioTags: string;
+  numberOfVideos: number; // Nytt
+  sortOrder: SortOrderOptions;     // Nytt
 }
 
 export default class StreamioVideoGalleryWebPart extends BaseClientSideWebPart<IStreamioVideoGalleryWebPartProps> {
@@ -28,7 +31,7 @@ export default class StreamioVideoGalleryWebPart extends BaseClientSideWebPart<I
   private _themeProvider: ThemeProvider;
 
   protected async onInit(): Promise<void> {
-    await super.onInit(); // Ensure base onInit completes
+    await super.onInit();
 
     this._themeProvider = this.context.serviceScope.consume(ThemeProvider.serviceKey);
     this._themeProvider.themeChangedEvent.add(this, this._handleThemeChangedEvent);
@@ -36,10 +39,18 @@ export default class StreamioVideoGalleryWebPart extends BaseClientSideWebPart<I
     if (currentTheme) {
         this._isDarkTheme = !!currentTheme.isInverted;
     }
+
+    // Sätt defaultvärden om de inte redan är satta
+    if (this.properties.numberOfVideos === undefined) {
+      this.properties.numberOfVideos = 20;
+    }
+    if (this.properties.sortOrder === undefined) {
+      this.properties.sortOrder = SortOrderOptions.CreatedAtDesc;
+    }
   }
 
   private _handleThemeChangedEvent(args: ThemeChangedEventArgs): void {
-    if (args.theme) { // Add null check for theme
+    if (args.theme) {
         this._isDarkTheme = !!args.theme.isInverted;
     }
     this.render();
@@ -55,7 +66,9 @@ export default class StreamioVideoGalleryWebPart extends BaseClientSideWebPart<I
         streamioTags: this.properties.streamioTags,
         httpClient: this.context.httpClient,
         isDarkTheme: this._isDarkTheme,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams
+        hasTeamsContext: !!this.context.sdks.microsoftTeams,
+        numberOfVideos: this.properties.numberOfVideos, // Skicka med
+        sortOrder: this.properties.sortOrder         // Skicka med
       }
     );
 
@@ -89,17 +102,38 @@ export default class StreamioVideoGalleryWebPart extends BaseClientSideWebPart<I
                 }),
                 PropertyPaneTextField('streamioPassword', {
                   label: "Streamio Password"
-                  // The 'type' property does not exist on IPropertyPaneTextFieldProps.
-                  // Visual masking in the property pane for password fields is a browser/SharePoint UI behavior.
-                  // The critical aspect is secure handling, not just visual masking in this config UI.
                 }),
                 PropertyPaneTextField('streamioTags', {
                   label: "Streamio Tags (comma-separated)",
                   description: "e.g., sports,nature"
                 }),
                 PropertyPaneLabel('', {
-                  text: "WARNING: Storing credentials directly in web part properties is not secure for production environments. Consider using a secure backend service or Azure Key Vault for credential management.",
+                  text: "WARNING: Storing credentials directly in web part properties is not secure for production environments.",
                   required: false
+                })
+              ]
+            },
+            { // Ny grupp för visningsinställningar
+              groupName: "Display Settings",
+              groupFields: [
+                PropertyPaneSlider('numberOfVideos', {
+                  label: "Number of videos to display",
+                  min: 1,
+                  max: 200, // Enligt önskemål
+                  step: 1,
+                  showValue: true,
+                  value: this.properties.numberOfVideos // Se till att värdet är bundet
+                }),
+                PropertyPaneDropdown('sortOrder', {
+                  label: "Sort videos by",
+                  options: [
+                    { key: SortOrderOptions.CreatedAtDesc, text: 'Latest Created (Default)' },
+                    { key: SortOrderOptions.CreatedAtAsc, text: 'Oldest Created' },
+                    { key: SortOrderOptions.TitleAsc, text: 'Title (A-Z)' },
+                    { key: SortOrderOptions.TitleDesc, text: 'Title (Z-A)' },
+                    // Lägg till fler om Streamio stöder det (t.ex. plays.desc)
+                  ],
+                  selectedKey: this.properties.sortOrder
                 })
               ]
             }
