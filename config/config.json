@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "streamio-video-gallery-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/streamioVideoGallery/StreamioVideoGalleryWebPart.js",
+          "manifest": "./src/webparts/streamioVideoGallery/StreamioVideoGalleryWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "StreamioVideoGalleryWebPartStrings": "lib/webparts/streamioVideoGallery/loc/{locale}.js"
+  }
+}

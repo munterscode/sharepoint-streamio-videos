@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "streamio-video-gallery-client-side-solution",
+    "id": "c58bba49-4455-4ee3-9f59-c928b027c165",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.21.1"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "streamio-video-gallery description"
+      },
+      "longDescription": {
+        "default": "streamio-video-gallery description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "streamio-video-gallery Feature",
+        "description": "The feature that activates elements of the streamio-video-gallery solution.",
+        "id": "217aac8e-4dc5-4724-8602-49aa960fb979",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/streamio-video-gallery.sppkg"
+  }
+}

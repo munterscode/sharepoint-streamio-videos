@@ -1,0 +1,18 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "18.20.8",
+    "sdksVersions": {},
+    "version": "1.21.1",
+    "libraryName": "streamio-video-gallery",
+    "libraryId": "c58bba49-4455-4ee3-9f59-c928b027c165",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "streamio-video-gallery",
+    "solutionShortDescription": "streamio-video-gallery description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
