@@ -99,8 +99,8 @@ const useStyles = makeStyles({
 interface IStreamioVideoGalleryState {
   videos: IStreamioVideo[];
   isLoading: boolean; // Används för både initial och "load more" spinner om videos är tomma
-  error: string | null;
-  selectedVideo: IStreamioVideo | null;
+  error: string | undefined;
+  selectedVideo: IStreamioVideo | undefined;
   isModalOpen: boolean;
   loadedVideosCount: number;
   canLoadMore: boolean;
@@ -112,8 +112,8 @@ const StreamioVideoGallery: React.FC<IStreamioVideoGalleryProps> = (props) => {
   const [state, setState] = useState<IStreamioVideoGalleryState>({
     videos: [],
     isLoading: true,
-    error: null,
-    selectedVideo: null,
+    error: undefined,
+    selectedVideo: undefined,
     isModalOpen: false,
     loadedVideosCount: 0,
     canLoadMore: false,
@@ -132,14 +132,14 @@ const StreamioVideoGallery: React.FC<IStreamioVideoGalleryProps> = (props) => {
     return `https://${urlPart}`;
   };
 
-  const fetchAndSetVideos = async (skipCount: number, isInitialLoad: boolean) => {
+  const fetchAndSetVideos = async (skipCount: number, isInitialLoad: boolean): Promise<void> => {
     if (!props.streamioUsername || !props.streamioPassword) {
       setState(s => ({ ...s, isLoading: false, isLoadingMore: false, error: "Streamio credentials not configured.", videos: [], loadedVideosCount: 0, canLoadMore: false }));
       return;
     }
 
     if (isInitialLoad) {
-      setState(s => ({ ...s, isLoading: true, isLoadingMore: false, error: null, videos: [], loadedVideosCount: 0, canLoadMore: false }));
+      setState(s => ({ ...s, isLoading: true, isLoadingMore: false, error: undefined, videos: [], loadedVideosCount: 0, canLoadMore: false }));
     } else {
       setState(s => ({ ...s, isLoadingMore: true, isLoading: false })); // isLoadingMore för spinner på knappen
     }
@@ -183,9 +183,10 @@ const StreamioVideoGallery: React.FC<IStreamioVideoGalleryProps> = (props) => {
         canLoadMore: newLoadedCount < props.numberOfVideos && newVideosData.length > 0 && newVideosData.length === limitForThisCall,
       }));
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching videos:", err);
-      setState(s => ({ ...s, error: err.message || "An unknown error occurred.", isLoading: false, isLoadingMore: false }));
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+      setState(s => ({ ...s, error: errorMessage, isLoading: false, isLoadingMore: false }));
     }
   };
 
@@ -193,28 +194,32 @@ const StreamioVideoGallery: React.FC<IStreamioVideoGalleryProps> = (props) => {
   useEffect(() => {
     // Denna useEffect körs när någon av de viktiga propsen ändras, vilket triggar en ny initial laddning.
     console.log("Props changed, initiating video fetch:", props.numberOfVideos, props.sortOrder, props.streamioTags);
-    fetchAndSetVideos(0, true); // Initial load, skip 0
+    fetchAndSetVideos(0, true).catch((error) => {
+      console.error("Failed to fetch videos:", error);
+    }); // Initial load, skip 0
   }, [props.streamioUsername, props.streamioPassword, props.streamioTags, props.numberOfVideos, props.sortOrder, props.httpClient]);
 
 
-  const handleLoadMore = () => {
+  const handleLoadMore = (): void => {
     if (state.canLoadMore && !state.isLoading && !state.isLoadingMore) {
-      fetchAndSetVideos(state.loadedVideosCount, false);
+      fetchAndSetVideos(state.loadedVideosCount, false).catch((error) => {
+        console.error("Failed to load more videos:", error);
+      });
     }
   };
 
-  const handleVideoPlay = (video: IStreamioVideo) => {
+  const handleVideoPlay = (video: IStreamioVideo): void => {
     setState(s => ({ ...s, selectedVideo: video, isModalOpen: true }));
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = (): void => {
     if (videoRef.current) {
         videoRef.current.pause();
     }
-    setState(s => ({ ...s, selectedVideo: null, isModalOpen: false }));
+    setState(s => ({ ...s, selectedVideo: undefined, isModalOpen: false }));
   };
 
-  const getPlayableStream = (video: IStreamioVideo | null): ITranscoding | null => {
+  const getPlayableStream = (video: IStreamioVideo | undefined): ITranscoding | null => {
     if (!video) return null;
     let stream = video.transcodings.find((t: ITranscoding) =>
       t.state === 'ready' && t.http_uri && t.title.includes('720p')
@@ -251,18 +256,18 @@ const StreamioVideoGallery: React.FC<IStreamioVideoGalleryProps> = (props) => {
     if (videoElement && playableStream && state.isModalOpen) {
       console.log("Video element found, attaching event listeners. SRC:", videoElement.src);
 
-      const onLoadedMetadata = () => console.log("Video metadata loaded. Duration:", videoElement.duration);
-      const onCanPlay = () => console.log("Video can play.");
-      const onPlaying = () => console.log("Video is playing.");
-      const onError = (e: Event) => {
+      const onLoadedMetadata = (): void => console.log("Video metadata loaded. Duration:", videoElement.duration);
+      const onCanPlay = (): void => console.log("Video can play.");
+      const onPlaying = (): void => console.log("Video is playing.");
+      const onError = (e: Event): void => {
         console.error("Video Player Error Event:", e);
         if (videoElement.error) {
           console.error("Video Element Error Code:", videoElement.error.code, "Message:", videoElement.error.message);
         }
       };
-      const onStalled = () => console.log("Video stalled.");
-      const onWaiting = () => console.log("Video waiting.");
-      const onSuspend = () => console.log("Video suspend.");
+      const onStalled = (): void => console.log("Video stalled.");
+      const onWaiting = (): void => console.log("Video waiting.");
+      const onSuspend = (): void => console.log("Video suspend.");
 
       videoElement.addEventListener('loadedmetadata', onLoadedMetadata);
       videoElement.addEventListener('canplay', onCanPlay);

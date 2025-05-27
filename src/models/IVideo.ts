@@ -11,9 +11,9 @@ export interface ITranscoding {
     title: string;
     http_uri: string;
     hls_uri: string;
-    rtmp_uri: string | null;
-    rtmp_base_uri: string | null;
-    rtmp_stream_uri: string | null;
+    rtmp_uri: string | undefined;
+    rtmp_base_uri: string | undefined;
+    rtmp_stream_uri: string | undefined;
     width: number;
     height: number;
     bitrate: number;
@@ -26,21 +26,29 @@ export interface IScreenshot {
     normal: string;
 }
 
+export interface ISubtitle {
+    id: string;
+    language: string;
+    title: string;
+    uri: string;
+    // Add other subtitle properties as needed
+}
+
 export interface IStreamioVideo {
     account_id: string;
     aspect_ratio_multiplier: number;
     created_at: string;
-    default_subtitle_id: string | null;
+    default_subtitle_id: string | undefined;
     description: string;
     internal_notes: string;
     duration: number;
     filename: string;
-    image_id: string | null;
+    image_id: string | undefined;
     plays: number;
     progress: number;
     state: string;
     tags: string[];
-    thumbnail_id: string | null;
+    thumbnail_id: string | undefined;
     title: string;
     updated_at: string;
     id: string;
@@ -50,6 +58,6 @@ export interface IStreamioVideo {
         size: number;
     };
     transcodings: ITranscoding[];
-    subtitles: any[]; // Define if needed
+    subtitles: ISubtitle[];
     screenshot: IScreenshot;
 }

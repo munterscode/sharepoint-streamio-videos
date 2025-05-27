@@ -21,8 +21,8 @@ export interface IStreamioVideoGalleryWebPartProps {
   streamioUsername: string;
   streamioPassword: string;
   streamioTags: string;
-  numberOfVideos: number; // Nytt
-  sortOrder: SortOrderOptions;     // Nytt
+  numberOfVideos: number;
+  sortOrder: SortOrderOptions;
 }
 
 export default class StreamioVideoGalleryWebPart extends BaseClientSideWebPart<IStreamioVideoGalleryWebPartProps> {
